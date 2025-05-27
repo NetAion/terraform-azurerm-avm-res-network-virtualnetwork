@@ -1,56 +1,48 @@
 resource "azapi_resource" "subnet" {
   type = "Microsoft.Network/virtualNetworks/subnets@2023-11-01"
   body = {
+    /*
+    Use merge with conditional maps to exclude unset ('null') values from the request body, preventing Terraform
+    from sending explicit nulls that could trigger unwanted changes during apply or import.
+*/
     properties = merge({
-      # always present
       delegations = var.delegation != null ? [
         for delegation in var.delegation : {
           name = delegation.name
           properties = {
             serviceName = delegation.service_delegation.name
           }
-        }
-      ] : []
+      }] : []
       privateEndpointNetworkPolicies    = var.private_endpoint_network_policies
       privateLinkServiceNetworkPolicies = var.private_link_service_network_policies_enabled == false ? "Disabled" : "Enabled"
       },
-      # only include these if non-null
-      var.address_prefix != null ? {
-        addressPrefix = var.address_prefix } : {
+      var.address_prefix == null ? {} : {
+        addressPrefix = var.address_prefix
       },
-      var.address_prefixes != null ? {
-        addressPrefixes = var.address_prefixes } : {
+      var.address_prefixes == null ? {} : {
+        addressPrefixes = var.address_prefixes
       },
-      var.default_outbound_access_enabled != null ? {
-        defaultOutboundAccess = var.default_outbound_access_enabled } : {
+      var.default_outbound_access_enabled == null ? {} : {
+        defaultOutboundAccess = var.default_outbound_access_enabled
       },
-      var.nat_gateway != null ? {
-        natGateway = { id = var.nat_gateway.id } } : {
+      var.nat_gateway == null ? {} : {
+        natGateway = { id = var.nat_gateway.id }
       },
-      var.network_security_group != null ? {
-        networkSecurityGroup = { id = var.network_security_group.id } } : {
+      var.network_security_group == null ? {} : {
+        networkSecurityGroup = { id = var.network_security_group.id }
       },
-      var.route_table != null ? {
-        routeTable = { id = var.route_table.id } } : {
+      var.route_table == null ? {} : {
+        routeTable = { id = var.route_table.id }
       },
-      var.service_endpoints != null ? {
-        serviceEndpoints = [
-          for service_endpoint in var.service_endpoints : {
-            service = service_endpoint
-          }
-        ] } : {
+      var.service_endpoints == null ? {} : {
+        serviceEndpoints = [for service_endpoint in var.service_endpoints : { service = service_endpoint }]
       },
-      var.service_endpoint_policies != null ? {
-        serviceEndpointPolicies = [
-          for sep in var.service_endpoint_policies : {
-            id = sep.id
-          }
-        ] } : {
+      var.service_endpoint_policies == null ? {} : {
+        serviceEndpointPolicies = [for sep in var.service_endpoint_policies : { id = sep.id }]
       },
-      var.sharing_scope != null ? {
-        sharingScope = var.sharing_scope } : {
-      }
-    )
+      var.sharing_scope == null ? {} : {
+        sharingScope = var.sharing_scope
+    })
   }
   locks                     = [var.virtual_network.resource_id]
   name                      = var.name
