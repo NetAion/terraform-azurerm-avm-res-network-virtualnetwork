@@ -41,13 +41,12 @@ variable "address_prefixes" {
 
 variable "default_outbound_access_enabled" {
   type        = bool
-  default     = false
+  default     = null
   description = <<DESCRIPTION
 (Optional) Determines whether default outbound internet access is enabled for this subnet. This can only be set at create time.
 
 More details here: https://learn.microsoft.com/en-gb/azure/virtual-network/ip-services/default-outbound-access
 DESCRIPTION
-  nullable    = false
 }
 
 variable "delegation" {
@@ -60,7 +59,7 @@ variable "delegation" {
   default     = null
   description = <<DESCRIPTION
 (Optional) A list of delegations to apply to the subnet. Each delegation supports the following:
-    
+
     - `name` - (Required) A name for this delegation.
     - `service_delegation` - (Required) A block defining the service to delegate to. It supports the
       - `name` - (Required) The name of the service to delegate to.
@@ -124,7 +123,7 @@ variable "role_assignments" {
   default     = {}
   description = <<DESCRIPTION
   (Optional) A map of role assignments to create on the subnet. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-  
+
   - `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
   - `principal_id` - The ID of the principal to assign the role to.
   - `description` - (Optional) The description of the role assignment.
@@ -133,7 +132,7 @@ variable "role_assignments" {
   - `condition_version` - (Optional) The version of the condition syntax. Leave as `null` if you are not using a condition, if you are then valid values are '2.0'.
   - `delegated_managed_identity_resource_id` - (Optional) The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created. This field is only used in cross-tenant scenario.
   - `principal_type` - (Optional) The type of the `principal_id`. Possible values are `User`, `Group` and `ServicePrincipal`. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
-  
+
   > Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
   DESCRIPTION
   nullable    = false
